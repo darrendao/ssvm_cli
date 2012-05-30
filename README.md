@@ -1,4 +1,4 @@
-ssvm_cli
-========
+chefkitchen_cli
+===============
 
-CLI for talking to ssvm web service to quickly spin up VMs
+CLI for talking to chefkitchen to do quick chef tasks

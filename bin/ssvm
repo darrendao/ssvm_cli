@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+$:.unshift File.join(File.dirname(__FILE__), "..", "lib")
+
+require 'fileutils'
+require 'yaml'
+require 'rubygems'
+require 'thor'
+require 'cookie_jar'
+require 'request_helper'
+
+class Ssvm < Thor
+  CONFIG_FILE = File.expand_path('~/.ssvm.yml')
+
+  desc 'create_vm', 'submit a VM creation request'
+  method_option :json, :desc => "Return result in json format"
+  method_option :desired_hostname, :aliases => '-n', :required => true, :desc => "Name for the VM"
+  method_option :owners, :aliases => '-o', :desc => "Owners of the VM", :type => :array
+  method_option :env, :aliases => '-e', :required => true, :desc => "Environment for the VM (e.g. prod or np)"
+  method_option :datacenter, :aliases => '-d', :required => true, :desc => "Datacenter for the VM (e.g. dc1 or dc2)"
+  method_option :build_spec, :required => true, :desc => "Default or customized VM request"
+  method_option :os, :desc => "What OS to use for the VM (e.g. Scientific Linux (Carbon) 6.0 x86_64)"
+  method_option :instances, :desc => "How many instances to make"
+  method_option :start_at, :desc => "What number to start at for multi instances request", :default => 1
+  method_option :optimal_spread, :desc => "Optimal spread for multi instances request", :default => "Rack"
+  method_option :minimal_spread, :desc => "Minimal spread for multi instances request", :default => "Rack"
+  method_option :memory, :aliases => '-m', :desc => "How much memory for the VM"
+  method_option :cpu, :aliases => '-c', :desc => "How CPU for the VM"
+  method_option :disk, :desc => "How much disk space for the VM"
+  method_option :no_exp, :type => :boolean, :desc => "No expiration for the VM"
+  method_option :justifications, :aliases => '-j', :desc => "Justification for any special request"
+  def create_vm
+    conf = load_conf(options[:conf_file] || CONFIG_FILE)
+    rhelper = RequestHelper.new(conf)
+    rhelper.create_vm(options)
+  end
+
+  desc "config", "configuration setup"
+  method_option :conf_file, :aliases => "-c", :desc => "Where to write config to"
+  def config
+    config_file = File.expand_path(options[:conf_file] || CONFIG_FILE)
+    puts "Provide the following inputs so ssvm_cli can save them to #{config_file} for future execution"
+    conf = {}
+    conf[:username] = ask("Username: ")
+    conf[:password] = ask("Password: ", true)
+    conf[:server] = ask("Chefkitchen server: ")
+    File.open(config_file, 'w') do |f|
+      YAML.dump(conf, f)
+    end
+    FileUtils.chmod 0700, config_file 
+    puts "#{config_file} has been created"
+  end
+
+  private
+  def ask(str,mask=false)
+    begin
+      print str
+      system 'stty -echo;' if mask
+      input = STDIN.gets.chomp
+    ensure
+      system 'stty echo; echo ""'
+    end
+    return input
+  end
+
+  def load_conf(conf_file)
+    YAML::load(File.open(File.expand_path(conf_file)))
+  end
+end
+
+Ssvm.start
