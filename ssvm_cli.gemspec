@@ -4,7 +4,7 @@ $LOAD_PATH.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "ssvm_cli"
-  s.version     = "0.0.1"
+  s.version     = "0.0.2"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Darren Dao"]
   s.email       = ["darrendao@gmail.com"]
@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'thor'
   s.add_dependency 'json'
-  s.add_dependency 'rest-client'
+  s.add_dependency 'rest-client', '~> 1.6.7'
   s.add_development_dependency 'yard', '~> 0.7'
 
   s.files            = `git ls-files`.split("\n")

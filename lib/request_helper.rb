@@ -1,5 +1,5 @@
 require 'rubygems'
-require 'rest-client'
+require 'rest_client'
 require 'json'
 require 'cookie_jar'
 
