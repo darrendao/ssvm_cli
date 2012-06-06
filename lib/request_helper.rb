@@ -18,10 +18,29 @@ class RequestHelper
     update_owner_field(options)
     handle_multi_instances(options)
     handle_custom_request(options)
+    handle_location_specs(options)
 
     begin
       response = RestClient.post("http://#{@server}/vm",
                                  {:vm_request => options},
+                                 {:cookies => @cookies, :content_type => 'application/json', :accept => :json})
+      result = JSON.parse(response)
+      if options[:json]
+        puts JSON.pretty_generate(result)
+      else
+        puts result['message']
+      end
+    rescue => e
+      puts e.inspect
+    end
+  end
+
+  def perform_action(options)
+    action = options['action']
+    hosts = options['hosts'] 
+    begin
+      response = RestClient.post("http://#{@server}/vm/#{action}",
+                                 {:id => hosts.first},
                                  {:cookies => @cookies, :content_type => 'application/json', :accept => :json})
       result = JSON.parse(response)
       if options[:json]
@@ -62,5 +81,23 @@ class RequestHelper
 
   def handle_custom_request(options)
     options['processor_count'] = options.delete('cpu')
+  end
+
+  def handle_location_specs(options)
+    location_specs = options.delete('location_specs')
+    return unless location_specs
+
+    location_specs.each_with_index do |location_spec, index|
+      tokens = location_spec.split(':')
+      raise "Invalid location specs" if tokens.size != 3
+      if tokens[0] != "include" and tokens[0] != "exclude"
+        raise "Invalid location specs - modifier must be #{include} or #{exclude} but it's #{tokens[0]} instead" 
+      end
+      raise "Invalid location specs" unless ['node', 'chassis', 'rack'].include? tokens[1]
+      
+      options["location_specs_attributes[#{index}][modifier]"] = tokens[0]
+      options["location_specs_attributes[#{index}][loc_type]"] = tokens[1]
+      options["location_specs_attributes[#{index}][value]"] = tokens[2]
+    end
   end
 end
