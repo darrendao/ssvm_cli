@@ -17,7 +17,7 @@ class Ssvm < Thor
   method_option :owners, :aliases => '-o', :desc => "Owners of the VM", :type => :array
   method_option :env, :aliases => '-e', :required => true, :desc => "Environment for the VM (e.g. prod or np)"
   method_option :datacenter, :aliases => '-d', :required => true, :desc => "Datacenter for the VM (e.g. dc1 or dc2)"
-  method_option :build_spec, :aliases => '-b', :required => true, :desc => "Default or customized VM request"
+  method_option :build_spec, :aliases => '-b', :required => true, :desc => "Default or customized VM request", :default => "default"
   method_option :os, :desc => "What OS to use for the VM (e.g. Scientific Linux (Carbon) 6.0 x86_64)"
   method_option :instances, :desc => "How many instances to make"
   method_option :start_at, :desc => "What number to start at for multi instances request", :default => 1
