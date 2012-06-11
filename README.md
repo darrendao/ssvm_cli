@@ -1,4 +1,4 @@
-chefkitchen_cli
+ssvm_cli
 ===============
 
-CLI for talking to chefkitchen to do quick chef tasks
+CLI for SSVM
